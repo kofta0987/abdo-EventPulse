@@ -1,18 +1,23 @@
 require("dotenv").config();
-const http = require("http");
 const app = require("./app");
 const connectDB = require("./config/db");
-const setupSocket = require("./socket");
-const PORT = process.env.PORT || 3000;
-const startServer = async () => {
-  await connectDB();
+
+// Connect to database on warm-up
+connectDB();
+
+// Only start the HTTP & Socket listener when running locally
+if (process.env.NODE_ENV !== "production") {
+  const http = require("http");
+  const setupSocket = require("./socket");
+  const PORT = process.env.PORT || 3000;
+
   const server = http.createServer(app);
   setupSocket(server);
+
   server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server running locally on port ${PORT}`);
   });
-};
-startServer().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+}
+
+// Export the Express app for Vercel
+module.exports = app;
