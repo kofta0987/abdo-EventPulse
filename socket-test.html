@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>EventPulse Socket Test</title>
+</head>
+<body>
+<h1>EventPulse Socket Test</h1>
+<button onclick="connectSocket()">Connect</button>
+<button onclick="joinEvent()">Join Event</button>
+<button onclick="sendAnnouncement()">Send Announcement</button>
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script>
+let socket;
+const token = "PUT_TOKEN_HERE";
+const eventId = "PUT_EVENT_ID_HERE";
+function connectSocket() {
+  socket = io("http://localhost:3000", {
+    auth: {
+      token: token
+    }
+  });
+  socket.on("connect", () => {
+    console.log("Connected:", socket.id);
+  });
+  socket.on("joined_event", (data) => {
+    console.log("Joined:", data);
+  });
+  socket.on("announcement", (data) => {
+    console.log("ANNOUNCEMENT:", data);
+  });
+  socket.on("error_message", (message) => {
+    console.log("ERROR:", message);
+  });
+  socket.on("disconnect", () => {
+    console.log("Disconnected");
+  });
+}
+function joinEvent() {
+  socket.emit("join_event", eventId);
+}
+function sendAnnouncement() {
+  socket.emit("announcement", {
+    eventId: eventId,
+    message: "Important event announcement!"
+  });
+}
+</script>
+</body>
+</html>
