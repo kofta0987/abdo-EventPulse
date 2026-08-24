@@ -18,25 +18,22 @@ app.get("/", (req, res) => {
 });
 app.get("/health", async (req, res) => {
   const mongoose = require("mongoose");
-  const dbStatus =
-    mongoose.connection.readyState === 1
-      ? "connected"
-      : "disconnected";
-  res.json({
-    status: "success",
-    server: "running",
-    database: dbStatus,
-  });
-});
-app.use("/api/auth", authRoutes);
-app.use("/api/events", eventRoutes);
-app.use("/api/registrations", registrationRoutes);
-app.use("/api/messages", messageRoutes);
-app.use((req, res) => {
-  res.status(404).json({
-    status: "fail",
-    message: "Route not found",
-  });
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      await connectDB();
+    }
+    res.json({
+      status: "success",
+      server: "running",
+      database: "connected",
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: "error",
+      server: "running",
+      database: "disconnected",
+    });
+  }
 });
 app.use(errorHandler);
 module.exports = app;
